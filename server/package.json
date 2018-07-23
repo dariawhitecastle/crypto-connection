@@ -1,0 +1,13 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "gdax": "^0.8.0",
+    "nodemon": "^1.18.3",
+    "request": "^2.87.0",
+    "socket.io": "^2.1.1"
+  }
+}
