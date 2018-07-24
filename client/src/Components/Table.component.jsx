@@ -19,11 +19,24 @@ const Trows = ({ data }) => {
 };
 
 const Table = ({ data }) => {
+  // tslint:disable-next-line:no-console
+  console.log(data);
+  let priceData = [];
+  const multiRow = Object.keys(data[0]).length === 1;
+
+  Object.keys(data[0]).length === 1
+    ? data.map(item => (priceData = Object.values(item)[0]))
+    : (priceData = data);
+
   return (
     <table>
-      <Thead data={data} />
+      <Thead data={priceData} />
       <tbody>
-        <Trows data={data} />
+        {multiRow ? (
+          data.map(item => <Trows key={Object.keys(item)} data={priceData} />)
+        ) : (
+          <Trows key={priceData.name} data={priceData} />
+        )}
       </tbody>
     </table>
   );

@@ -1,29 +1,55 @@
 import React from 'react';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import * as actions from '../redux/actions/coins.actions.js';
 import Table from '../Components/Table.component.jsx';
 import { isEqual } from 'lodash';
-import { getIntervalPrices, closeSocket2 } from '../api';
 
 class Prices extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      priceData: []
+      priceData: [{ tickerData: this.props.tickerData }]
     };
   }
 
-  componentWillMount() {
-    getIntervalPrices((err, data) => {
-      this.setState({ priceData: data });
-    });
-  }
-  shouldComponentUpdate(prevProps, prevState) {
-    return !isEqual(this.state.priceData, prevState.priceData);
-  }
-  componentWillUnmount() {
-    closeSocket2();
+  componentDidlMount() {
+    this.props.actions.fetchLatestData();
+    this.getLatestData();
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    // return (
+    //   !isEqual(this.state.priceData, nextState.priceData) ||
+    //   !isEqual(this.props.tickerData, nextProps.tickerData)
+    // );
+    return true;
+  }
+
+  getLatestData = () => {
+    let timestamp = new Date().getMinutes();
+    let updatedPrices = [];
+
+    if (this.state.priceData.length >= 30) {
+      this.setState({
+        priceData: [
+          ...this.state.priceData.slice(0, 29),
+          { [timestamp]: this.props.latestSetOfPrices }
+        ]
+      });
+    } else {
+      this.setState({
+        priceData: [
+          ...this.state.priceData,
+          { [timestamp]: this.props.latestSetOfPrices }
+        ]
+      });
+    }
+  };
+
   render() {
+    // tslint:disable-next-line:no-console
+    console.log('updating', this.state.priceData);
     if (!this.state.priceData.length) {
       return <div>Loading...</div>;
     } else {
@@ -38,4 +64,18 @@ class Prices extends React.Component {
   }
 }
 
-export default Prices;
+const mapStateToProps = state => {
+  return {
+    latestSetOfPrices: state.coinReducer.latestSetOfPrices,
+    tickerData: state.coinReducer.recentPrices
+  };
+};
+
+const mapDispatchToProps = dispatch => ({
+  actions: bindActionCreators(actions, dispatch)
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Prices);
