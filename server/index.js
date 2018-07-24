@@ -16,13 +16,12 @@ socket.on('connection', (messageEmitter) => { // my socket app has started
 
   // 2) make connection with messageEmitter
   messageEmitter.on('getTickerPrices', (interval) => {
-
-    setInterval(() => {socket.emit('connectionReceived', coins)}, interval)
+    setInterval(() => {messageEmitter.emit('connectionReceived', coins)}, interval)
   })
-
   messageEmitter.on('getIntervalPrices', (interval) => {
-    setInterval(() => {socket.emit('intervalConnectionReceived', coins)}, interval)
+    setInterval(() => {messageEmitter.emit('intervalConnectionReceived', coins)}, interval)
   })
+
 
 })
 
