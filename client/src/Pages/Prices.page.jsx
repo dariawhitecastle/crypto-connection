@@ -8,55 +8,33 @@ import { isEqual } from 'lodash';
 class Prices extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      priceData: [{ tickerData: this.props.tickerData }]
-    };
+    this.state = {};
   }
 
-  componentDidlMount() {
+  componentWillMount() {
     this.props.actions.fetchLatestData();
-    this.getLatestData();
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    // return (
-    //   !isEqual(this.state.priceData, nextState.priceData) ||
-    //   !isEqual(this.props.tickerData, nextProps.tickerData)
-    // );
-    return true;
+  shouldComponentUpdate(nextProps) {
+    return this.props.latestPrices.length !== nextProps.latestPrices.length;
   }
-
-  getLatestData = () => {
-    let timestamp = new Date().getMinutes();
-    let updatedPrices = [];
-
-    if (this.state.priceData.length >= 30) {
-      this.setState({
-        priceData: [
-          ...this.state.priceData.slice(0, 29),
-          { [timestamp]: this.props.latestSetOfPrices }
-        ]
-      });
-    } else {
-      this.setState({
-        priceData: [
-          ...this.state.priceData,
-          { [timestamp]: this.props.latestSetOfPrices }
-        ]
-      });
-    }
-  };
 
   render() {
-    // tslint:disable-next-line:no-console
-    console.log('updating', this.state.priceData);
-    if (!this.state.priceData.length) {
+    const data = !this.props.latestPrices.length
+      ? this.props.tickerData
+      : this.props.latestPrices;
+
+    if (!data.length) {
       return <div>Loading...</div>;
     } else {
       return (
         <header>
           <section>
-            <Table data={this.state.priceData} />
+            <p className="section-header">
+              Prices for the last 30 minutes. Please allow a few minutes for
+              prices to show up.{' '}
+            </p>
+            <Table data={data} />
           </section>
         </header>
       );
@@ -66,8 +44,8 @@ class Prices extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    latestSetOfPrices: state.coinReducer.latestSetOfPrices,
-    tickerData: state.coinReducer.recentPrices
+    latestPrices: state.coinReducer.latestPrices,
+    tickerData: state.coinReducer.tickerPrices
   };
 };
 

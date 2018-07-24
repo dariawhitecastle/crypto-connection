@@ -16,3 +16,10 @@ table {
 .dataRow > td {
   text-align: center;
 }
+
+.section-header {
+  text-transform: uppercase;
+  white-space: nowrap;
+  margin: 10px;
+  text-align: center;
+}

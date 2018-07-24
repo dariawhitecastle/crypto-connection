@@ -1,4 +1,4 @@
 export default {
-  latestSetOfPrices: [],
-  recentPrices: []
+  latestPrices: [],
+  tickerPrices: []
 };

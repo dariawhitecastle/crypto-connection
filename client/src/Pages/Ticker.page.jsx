@@ -18,7 +18,9 @@ class Ticker extends React.Component {
   componentWillMount() {
     this.props.actions.fetchCoinsData();
   }
-
+  componentWillUnmount() {
+    closeSocket1();
+  }
   render() {
     if (!this.props.tickerData.length) {
       return <div>Loading...</div>;
@@ -26,6 +28,7 @@ class Ticker extends React.Component {
       return (
         <header>
           <section>
+            <p className="section-header">Most up-to-date coin prices</p>
             <Table data={this.props.tickerData} />
           </section>
         </header>
@@ -36,7 +39,7 @@ class Ticker extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    tickerData: state.coinReducer.recentPrices
+    tickerData: state.coinReducer.tickerPrices
   };
 };
 
