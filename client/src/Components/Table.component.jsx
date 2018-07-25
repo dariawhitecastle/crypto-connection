@@ -1,5 +1,6 @@
 import React from 'react';
-import { map, flatten, assign, merge } from 'lodash';
+import { map, get, each, filter, find, min, max } from 'lodash';
+import classnames from 'classnames';
 
 const Thead = ({ data }) => {
   return (
@@ -8,79 +9,146 @@ const Thead = ({ data }) => {
     </thead>
   );
 };
-
 const Trows = ({ data }) => {
   return (
     <tr className="dataRow">
-      {data.map(coin => (
-        <td key={coin.id}>{`${coin.quotes.BTC.price.toFixed(8)} BTC`}</td>
-      ))}
+      {data.map(coin => {
+        return (
+          <td key={coin.id}>{`${coin.quotes.BTC.price.toFixed(8)} BTC`}</td>
+        );
+      })}
     </tr>
   );
 };
 
-const findPrices = arr => {
-  const arrayOfPrices = map(arr, item =>
-    map(Object.values(item)[0], coin => {
-      return [coin.name, coin.quotes.BTC.price.toFixed(8)];
-    })
+const MultiTrows = ({ data, coinMinMax, state, timestamp }) => {
+  return (
+    <tr className="dataRow">
+      {data.map(coin => {
+        return (
+          <td
+            className={classnames(
+              {
+                highestVal: state
+                  ? state[`highest${coin.name}`] === timestamp
+                  : false
+              },
+              {
+                lowestVal: state
+                  ? state[`lowest${coin.name}`] === timestamp
+                  : false
+              }
+            )}
+            key={coin.id}
+          >{`${coin.quotes.BTC.price.toFixed(8)} BTC`}</td>
+        );
+      })}
+    </tr>
   );
-  return flatten(arrayOfPrices);
+};
+const findPrices = arr => {
+  let allPrices = {
+    Dogecoin: [],
+    Litecoin: [],
+    Monero: []
+  };
+
+  map(arr, item => {
+    // item = {Tue Jul 24 2018 16:38:34 GMT-0600 (Mountain Daylight Time): Array(3)}
+    each(Object.values(item)[0], coin => {
+      return allPrices[coin.name]
+        ? (allPrices[coin.name] = [
+            ...allPrices[coin.name],
+            coin.quotes.BTC.price.toFixed(8)
+          ])
+        : null;
+    });
+  });
+
+  const coinMinMax = {
+    Dogecoin: allPrices.Dogecoin.sort(sortPrices),
+    Litecoin: allPrices.Litecoin.sort(sortPrices),
+    Monero: allPrices.Monero.sort(sortPrices)
+  };
+  return coinMinMax;
 };
 
-const objectify = arr => {
-  return arr.reduce(function(prev, curr) {
-    prev[curr[0]] = curr[1];
-    return prev;
-  }, {});
-};
+const sortPrices = (a, b) => a - b;
 
-class Table extends React.PureComponent {
+class Table extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      current: true
+    };
 
     this.multiRow = Object.keys(this.props.data[0]).length === 1;
   }
 
   componentWillMount() {
     if (this.multiRow) {
-      const prices = objectify(findPrices(this.props.data));
+      const coinMinMax = findPrices(this.props.data);
       this.setState({
-        prices
+        coinMinMax
       });
     }
   }
 
   componentWillReceiveProps(prevProps) {
-    if (prevProps.data !== this.props.data) {
-      const getNewPrices = objectify(findPrices(this.props.data));
-      const newPrices = merge(newPrices, this.state.prices);
+    if (prevProps.data !== this.props.data && this.multiRow) {
+      const coinMinMax = findPrices(this.props.data);
       this.setState({
-        prices: newPrices
+        coinMinMax
+      });
+
+      this.props.data.map((item, i, array) => {
+        Object.values(item)[0].map(coin => {
+          if (min(coinMinMax[coin.name]) === coin.quotes.BTC.price.toFixed(8)) {
+            this.setState({
+              [`lowest${coin.name}`]: Object.keys(item)[0]
+            });
+          } else if (
+            max(coinMinMax[coin.name]) === coin.quotes.BTC.price.toFixed(8)
+          ) {
+            this.setState({
+              [`highest${coin.name}`]: Object.keys(item)[0]
+            });
+          } else {
+            return this.state;
+          }
+        });
       });
     }
   }
 
   render() {
-    // tslint:disable-next-line:no-console
-    console.log(this.state);
     const { data } = this.props;
-    let priceData = [];
+    const { coinMinMax, ...rest } = this.state;
 
+    let rowData = [];
     this.multiRow
-      ? data.map(item => (priceData = Object.values(item)[0]))
-      : (priceData = data);
+      ? data.map(item => (rowData = Object.values(item)[0]))
+      : (rowData = data);
 
     return (
       <table>
-        <Thead data={priceData} />
+        <Thead data={rowData} />
         <tbody>
           {this.multiRow ? (
-            data.map(item => <Trows key={Object.keys(item)} data={priceData} />)
+            data.map(timestamp => {
+              return (
+                <MultiTrows
+                  key={Object.keys(timestamp)[0]}
+                  timestamp={Object.keys(timestamp)[0]}
+                  data={Object.values(timestamp)[0]}
+                  coinMinMax={coinMinMax}
+                  state={{ ...rest }}
+                />
+              );
+            })
           ) : (
-            <Trows key={priceData.id} data={priceData} />
+            <Trows key={data.id} data={data} />
           )}
         </tbody>
       </table>

@@ -16,7 +16,9 @@ table {
 .dataRow > td {
   text-align: center;
 }
-
+td.lowestVal {
+  color: green;
+}
 .section-header {
   text-transform: uppercase;
   white-space: nowrap;
