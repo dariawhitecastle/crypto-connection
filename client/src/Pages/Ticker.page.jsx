@@ -4,7 +4,7 @@ import { bindActionCreators } from 'redux';
 import * as actions from '../redux/actions/coins.actions.js';
 import Table from '../Components/Table.component.jsx';
 import { isEqual } from 'lodash';
-import { getTickerPrices, closeSocket1 } from '../api';
+import { closeSocket1 } from '../api';
 
 class Ticker extends React.Component {
   constructor(props) {

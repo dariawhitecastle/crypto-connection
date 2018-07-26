@@ -16,8 +16,14 @@ table {
 .dataRow > td {
   text-align: center;
 }
-td.lowestVal {
+td.lowestVal,
+p.lowestVal {
   color: green;
+}
+
+td.highestVal,
+p.highestVal {
+  color: red;
 }
 .section-header {
   text-transform: uppercase;

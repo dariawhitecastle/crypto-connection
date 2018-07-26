@@ -15,10 +15,9 @@ function coinReducer(state = initialState, action) {
     }
     case RECEIVE_LATEST_PRICE: {
       const newPrices = action.payload;
-      let timestamp = new Date();
+      let timestamp = new Date().toLocaleString();
 
       if (state.latestPrices.length >= 30) {
-        // tslint:disable-next-line:no-console
         return {
           ...state,
           latestPrices: [

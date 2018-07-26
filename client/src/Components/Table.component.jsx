@@ -3,6 +3,7 @@ import { map, get, each, filter, find, min, max } from 'lodash';
 import classnames from 'classnames';
 
 const Thead = ({ data }) => {
+  // console.log(data);
   return (
     <thead className="tableHead">
       <tr>{data.map(coin => <th key={coin.name}>{coin.name}</th>)}</tr>
@@ -54,7 +55,6 @@ const findPrices = arr => {
   };
 
   map(arr, item => {
-    // item = {Tue Jul 24 2018 16:38:34 GMT-0600 (Mountain Daylight Time): Array(3)}
     each(Object.values(item)[0], coin => {
       return allPrices[coin.name]
         ? (allPrices[coin.name] = [
@@ -79,9 +79,7 @@ class Table extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      current: true
-    };
+    this.state = {};
 
     this.multiRow = Object.keys(this.props.data[0]).length === 1;
   }
@@ -103,20 +101,23 @@ class Table extends React.Component {
       });
 
       this.props.data.map((item, i, array) => {
+        this.setState({
+          timestamp: Object.keys(item)[0]
+        });
         Object.values(item)[0].map(coin => {
+          // if current coin price matches lowest price for that coins we set the state to the current coin timestamp
           if (min(coinMinMax[coin.name]) === coin.quotes.BTC.price.toFixed(8)) {
             this.setState({
               [`lowest${coin.name}`]: Object.keys(item)[0]
             });
-          } else if (
-            max(coinMinMax[coin.name]) === coin.quotes.BTC.price.toFixed(8)
-          ) {
-            this.setState({
-              [`highest${coin.name}`]: Object.keys(item)[0]
-            });
-          } else {
-            return this.state;
           }
+          // if current coin price matches highest price for that coins we set the state to the current coin timestamp
+          if (max(coinMinMax[coin.name]) === coin.quotes.BTC.price.toFixed(8)) {
+            this.setState({
+              [`highest${coin.name}`]: this.state.timestamp
+            });
+          }
+          return this.state;
         });
       });
     }
@@ -126,14 +127,14 @@ class Table extends React.Component {
     const { data } = this.props;
     const { coinMinMax, ...rest } = this.state;
 
-    let rowData = [];
+    let tHeadData = [];
     this.multiRow
-      ? data.map(item => (rowData = Object.values(item)[0]))
-      : (rowData = data);
+      ? (tHeadData = Object.values(data[0])[0])
+      : (tHeadData = data);
 
     return (
       <table>
-        <Thead data={rowData} />
+        <Thead data={tHeadData} />
         <tbody>
           {this.multiRow ? (
             data.map(timestamp => {

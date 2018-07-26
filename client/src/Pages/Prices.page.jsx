@@ -4,8 +4,9 @@ import { connect } from 'react-redux';
 import * as actions from '../redux/actions/coins.actions.js';
 import Table from '../Components/Table.component.jsx';
 import { isEqual } from 'lodash';
+import { closeSocket2 } from '../api';
 
-class Prices extends React.Component {
+class Prices extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {};
@@ -15,13 +16,19 @@ class Prices extends React.Component {
     this.props.actions.fetchLatestData();
   }
 
-  shouldComponentUpdate(nextProps) {
-    return this.props.latestPrices.length !== nextProps.latestPrices.length;
+  // shouldComponentUpdate(nextProps) {
+  //   return this.props.latestPrices.length !== nextProps.latestPrices.length;
+  // }
+
+  componentWillUnmount() {
+    closeSocket2();
   }
 
   render() {
+    const timestamp = new Date().toLocaleString();
+
     const data = !this.props.latestPrices.length
-      ? this.props.tickerData
+      ? { timestamp: this.props.tickerData }
       : this.props.latestPrices;
 
     if (!data.length) {
@@ -29,11 +36,13 @@ class Prices extends React.Component {
     } else {
       return (
         <header>
-          <section>
-            <p className="section-header">
+          <section className="section-header">
+            <p>
               Prices for the last 30 minutes. Please allow a few minutes for
               prices to show up.{' '}
             </p>
+            <p className="lowestVal">Lowest Price</p>
+            <p className="highestVal">Highest price</p>
             <Table data={data} />
           </section>
         </header>

@@ -12,6 +12,7 @@ export const getTickerPrices = cb => {
 };
 
 export const getIntervalPrices = cb => {
+  socket2.open();
   socket2.emit('getIntervalPrices', 6000);
   socket2.on('intervalConnectionReceived', data => {
     return cb(null, data);
@@ -20,4 +21,8 @@ export const getIntervalPrices = cb => {
 
 export const closeSocket1 = () => {
   socket.close();
+};
+
+export const closeSocket2 = () => {
+  socket2.close();
 };
