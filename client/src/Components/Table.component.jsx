@@ -3,7 +3,6 @@ import { map, get, each, filter, find, min, max } from 'lodash';
 import classnames from 'classnames';
 
 const Thead = ({ data }) => {
-  // console.log(data);
   return (
     <thead className="tableHead">
       <tr>{data.map(coin => <th key={coin.name}>{coin.name}</th>)}</tr>
@@ -75,22 +74,11 @@ const findPrices = arr => {
 
 const sortPrices = (a, b) => a - b;
 
-class Table extends React.Component {
+class Table extends React.PureComponent {
   constructor(props) {
     super(props);
-
     this.state = {};
-
     this.multiRow = Object.keys(this.props.data[0]).length === 1;
-  }
-
-  componentWillMount() {
-    if (this.multiRow) {
-      const coinMinMax = findPrices(this.props.data);
-      this.setState({
-        coinMinMax
-      });
-    }
   }
 
   componentWillReceiveProps(prevProps) {
@@ -126,6 +114,7 @@ class Table extends React.Component {
   render() {
     const { data } = this.props;
     const { coinMinMax, ...rest } = this.state;
+    const seconds = new Date().getSeconds();
 
     let tHeadData = [];
     this.multiRow
@@ -140,7 +129,7 @@ class Table extends React.Component {
             data.map(timestamp => {
               return (
                 <MultiTrows
-                  key={Object.keys(timestamp)[0]}
+                  key={`${Object.keys(timestamp)[0]}-${seconds}`}
                   timestamp={Object.keys(timestamp)[0]}
                   data={Object.values(timestamp)[0]}
                   coinMinMax={coinMinMax}

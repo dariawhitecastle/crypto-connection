@@ -12,13 +12,9 @@ class Prices extends React.PureComponent {
     this.state = {};
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.props.actions.fetchLatestData();
   }
-
-  // shouldComponentUpdate(nextProps) {
-  //   return this.props.latestPrices.length !== nextProps.latestPrices.length;
-  // }
 
   componentWillUnmount() {
     closeSocket2();
@@ -26,10 +22,11 @@ class Prices extends React.PureComponent {
 
   render() {
     const timestamp = new Date().toLocaleString();
+    const { latestPrices, tickerData } = this.props;
 
-    const data = !this.props.latestPrices.length
-      ? { timestamp: this.props.tickerData }
-      : this.props.latestPrices;
+    const data = !latestPrices.length
+      ? { timestamp: [...tickerData] }
+      : latestPrices;
 
     if (!data.length) {
       return <div>Loading...</div>;
